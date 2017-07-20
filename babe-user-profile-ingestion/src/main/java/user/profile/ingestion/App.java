@@ -17,7 +17,7 @@ public class App {
         ApplicationContext context = SpringApplication.run(App.class, args);
         /*args format ex : file phoenix 2017-07-05 , means data read from file and write to phoenix*/
         if(args.length < 1) {
-            throw new InvalidParameterException("App needs arg for date name folder, reader source DB and writer source DB , ex : file phoenix 2017-07-05");
+            throw new InvalidParameterException("App needs arg for date name folder, reader source DB and writer source DB , ex : rawfile phoenix 2017-07-05");
         }
 
         String readerSource = args[0];
@@ -31,7 +31,7 @@ public class App {
                 service.run(readerSource, writerSource, date);
             }
         } else {
-            throw new InvalidParameterException("App needs arg for date name folder, reader source DB and writer source DB , ex : file phoenix 2017-07-05");
+            throw new InvalidParameterException("App needs arg for date name folder, reader source DB and writer source DB , ex : rawfile phoenix 2017-07-05");
         }
 
     }

@@ -34,11 +34,11 @@ public class RawFileReader implements Reader {
     @Value("${rawFile.folder-location}")
     String rawFileLocation;
 
+    long tStart = System.currentTimeMillis();
+
     @Override
     public void run (final EventWriter writer, String date) {
 
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
         LOGGER.info("Start : RawFileReader reader from raw file , total thread : {} ",threadNumber);
 
         ExecutorService executorService = Executors.newFixedThreadPool(threadNumber);
@@ -78,9 +78,7 @@ public class RawFileReader implements Reader {
         }
 
         executorService.shutdown();
-        stopWatch.stop();
-
-        LOGGER.info("End : {} process end , Total Time : {} minutes",RawFileReader.class,stopWatch.getTime()/1000/60);
+        LOGGER.info("End : {} process end , Total Time : {} minutes",RawFileReader.class,(System.currentTimeMillis() - tStart) / (1000.0 * 60.0));
     }
     
     public void parseFile(String filePath,EventWriter writer) {
@@ -110,7 +108,8 @@ public class RawFileReader implements Reader {
                     resultList.clear();
                     Thread.sleep(1000);
                     String fileName = filePath.substring(filePath.lastIndexOf("/"),filePath.length());
-                    LOGGER.info("RawFileReader : File Path {} , {} row data were inserted by thread {}",fileName,count,Thread.currentThread().getId());
+                    LOGGER.info("RawFileReader : File Path {} , {} datas inserted by thread {}, total time {} minutes "
+                            ,fileName,count,Thread.currentThread().getId(),(System.currentTimeMillis() - tStart) / (1000.0 * 60.0) );
 //                    LOGGER.info("RawFileReader : {} row data , thread {}",count,Thread.currentThread().getId());
                 }
             }

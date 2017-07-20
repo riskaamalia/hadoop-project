@@ -1,4 +1,4 @@
-CREATE TABLE test_aja (
+CREATE TABLE profile_test (
     userId VARCHAR NOT NULL,
 	logTime DATE NOT NULL,
 	appId INTEGER NOT NULL,

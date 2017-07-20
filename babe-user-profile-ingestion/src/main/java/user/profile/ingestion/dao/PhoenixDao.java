@@ -19,6 +19,8 @@ public class PhoenixDao {
     public void InsertToPhoenix (List<EventModel> eventList, String phoenixJDBCConfig, String phoenixTableName) {
         Connection connection = null;
         PreparedStatement statement = null;
+        LOGGER.info("PhoenixDao : Connect to Phoenix with table name {} ",phoenixTableName );
+
         try {
             connection = DriverManager.getConnection(phoenixJDBCConfig);
             connection.setAutoCommit(false);
