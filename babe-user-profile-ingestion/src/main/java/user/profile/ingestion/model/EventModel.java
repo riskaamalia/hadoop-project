@@ -18,6 +18,9 @@ public class EventModel {
     @SerializedName("sesId")
     private String sesId;
 
+    @SerializedName("sesBeTm")
+    private long sesBeTm;
+
     @SerializedName("appId")
     private int appId;
 
@@ -315,5 +318,13 @@ public class EventModel {
 
     public void setPubDate(long pubDate) {
         this.pubDate = pubDate;
+    }
+
+    public long getSesBeTm() {
+        return sesBeTm;
+    }
+
+    public void setSesBeTm(long sesBeTm) {
+        this.sesBeTm = sesBeTm;
     }
 }

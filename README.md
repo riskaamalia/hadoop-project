@@ -1,3 +1,4 @@
 This project role is :
-- Read event json (users of babe events) in raw file from babe-log-cluster project
+- Read event json in raw file
 - Write them to Phoenix in Hadoop Environment
+- Create simple get REST API using spring to get data from phoenix

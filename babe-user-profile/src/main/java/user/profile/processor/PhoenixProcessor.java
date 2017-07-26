@@ -1,7 +1,7 @@
 package user.profile.processor;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import user.profile.model.EventModel;
 import user.profile.util.UtilConvertion;
 
@@ -19,10 +19,13 @@ public class PhoenixProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PhoenixProcessor.class);
 
-    public List<EventModel> getData (Map<String,Object> params, String phoenixJDBCConfig, String phoenixTableName) {
+    UtilConvertion utilConvertion = new UtilConvertion();
 
-        List<EventModel> datas = new ArrayList<>();
+    public Map<String,List<EventModel>> getData (Map<String,Object> params, String phoenixJDBCConfig, String phoenixTableName) {
+
+        Map<String,List<EventModel>> datas = new HashMap<>();
         EventModel data = new EventModel();
+        String userId = "";
 
         // Create variables
         Connection connection = null;
@@ -32,7 +35,6 @@ public class PhoenixProcessor {
 
         //change param to phoenix param
         Map<String,Object> phoenixParam = new HashMap<String,Object> ();
-        UtilConvertion utilConvertion = new UtilConvertion();
 
         for (Map.Entry<String, Object> param:params.entrySet()) {
             String key = param.getKey();
@@ -47,16 +49,16 @@ public class PhoenixProcessor {
             statement = connection.createStatement();
 
             // Query for table
-            ps = connection.prepareStatement(constructSQL(phoenixParam,phoenixTableName));
+            String sqlQuery = constructSQL(phoenixParam,phoenixTableName) ;
+            System.out.println("Query : "+sqlQuery);
+            ps = connection.prepareStatement(sqlQuery);
             rs = ps.executeQuery();
 
-            System.out.println("Table Values");
-
             while(rs.next()) {
-
                 //translate again and convert to datas by column index
-//                data.setEventName(rs.getString(utilConvertion.getPhoenixParam("event")));
-                data.setUserId(rs.getString(utilConvertion.getPhoenixParam("uid")));
+
+                userId = rs.getString(utilConvertion.getPhoenixParam("uid"));
+                data.setUserId(userId);
                 data.setAppId(rs.getInt(utilConvertion.getPhoenixParam("aid")));
                 data.setValue(rs.getDouble(utilConvertion.getPhoenixParam("value")));
                 data.setTypeItem(rs.getString(utilConvertion.getPhoenixParam("type")));
@@ -80,6 +82,9 @@ public class PhoenixProcessor {
                 data.setImprId(rs.getLong("IMPRID"));
                 data.setIcu(rs.getString(utilConvertion.getPhoenixParam("icu")));
                 data.setLoc(rs.getString(utilConvertion.getPhoenixParam("loc")));
+                data.setSesId(rs.getString(utilConvertion.getPhoenixParam("ses_id")));
+                data.setSesBeTm(rs.getLong(utilConvertion.getPhoenixParam("ses_time")));
+
 
                 Array labelArray = rs.getArray(utilConvertion.getPhoenixParam("label"));
                 if (labelArray != null) {
@@ -96,9 +101,22 @@ public class PhoenixProcessor {
                     data.setEntities((String[]) entityArray.getArray());
                 }
 
+                //store to a new object
+                EventModel copyData = collectData(data);
+                System.out.println(copyData.getUserId()+" === "+copyData.getLogTime()+" === "+copyData.getSesId());
 
-                datas.add(data);
+                //store to maps per user id
+                if (datas.containsKey(userId)) {
+                    //if already store , just add new one
+                    datas.get(userId).add(copyData);
+                } else {
+                    List<EventModel> newUserId = new ArrayList<>();
+                    newUserId.add(copyData);
+                    datas.put(userId,newUserId);
+                }
+
             }
+
         }
         catch(SQLException e) {
             e.printStackTrace();
@@ -133,16 +151,36 @@ public class PhoenixProcessor {
         return datas;
     }
 
-    private String constructSQL (Map<String,Object> params, String phoenixTableName) {
+    private String constructSQL (Map<String,Object> phoenixParams, String phoenixTableName) {
         //default value
         String sql = "select * from "+phoenixTableName+" where ";
-        int loop = 0;
-        for (Map.Entry<String, Object> param:params.entrySet()) {
+        String endSql = "";
 
+        //for order and limit first
+        if (phoenixParams.containsKey("ORDER BY")) {
+            String orderByValue = phoenixParams.get("ORDER BY").toString();
+            endSql = " order by "+utilConvertion.getPhoenixParam(orderByValue);
+            phoenixParams.remove("ORDER BY");
+        }
+
+        //asc or desc
+        if (phoenixParams.containsKey("SORT")) {
+            endSql = endSql.concat(" "+phoenixParams.get("SORT").toString());
+            phoenixParams.remove("SORT");
+        }
+
+        if (phoenixParams.containsKey("LIMIT")) {
+            endSql = endSql.concat(" limit "+phoenixParams.get("LIMIT").toString());
+            phoenixParams.remove("LIMIT");
+        }
+            
+        int loop = 0;
+        for (Map.Entry<String, Object> param:phoenixParams.entrySet()) {
+
+            
             //concat key first
             sql = sql.concat(param.getKey()+" = ");
 
-            //convert value
             if ( param.getValue() instanceof Integer || param.getValue() instanceof Double || param.getValue() instanceof Long ) {
                 sql = sql.concat( param.getValue().toString() );
             } else {
@@ -152,12 +190,45 @@ public class PhoenixProcessor {
 
             //operator AND
             loop++;
-            if (loop < params.size()) {
+            if (loop < phoenixParams.size()) {
                 sql = sql.concat(" and ");
             }
         }
 
-        return sql.concat(" limit 10");
+        return sql.concat(endSql);
+    }
+
+    private EventModel collectData ( EventModel data ) {
+        EventModel copyData = new EventModel();
+
+        copyData.setUserId(data.getUserId());
+        copyData.setAppId(data.getAppId());
+        copyData.setValue(data.getValue());
+        copyData.setTypeItem(data.getTypeItem());
+        copyData.setPubItem(data.getPubItem());
+        copyData.setPubDate(data.getPubDate());
+        copyData.setPosItem(data.getPosItem());
+        copyData.setPosId(data.getPosId());
+        copyData.setOsv(data.getOsv());
+        copyData.setNewUsr(data.getNewUsr());
+        copyData.setAppVer(data.getAppVer());
+        copyData.setAuthor(data.getAuthor());
+        copyData.setType(data.getType());
+        copyData.setEventName(data.getEventName());
+        copyData.setCateItem(data.getCateItem());
+        copyData.setCity(data.getCity());
+        copyData.setCountry(data.getCountry());
+        copyData.setNet(data.getNet());
+        copyData.setDevMod(data.getDevMod());
+        copyData.setLogTime(data.getLogTime());
+        copyData.setIdItem(data.getIdItem());
+        copyData.setImprId(data.getImprId());
+        copyData.setIcu(data.getIcu());
+        copyData.setLoc(data.getLoc());
+        copyData.setSesId(data.getSesId());
+        copyData.setSesBeTm(data.getSesBeTm());
+
+        return copyData;
     }
 
     /*public static void main (String [] args) {

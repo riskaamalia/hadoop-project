@@ -4,6 +4,8 @@ CREATE TABLE profile_test (
 	appId INTEGER NOT NULL,
 	icu VARCHAR NOT NULL,
 	eventName VARCHAR NOT NULL,
+	sesId VARCHAR,
+	sesBeTm BIGINT,
 	appVer VARCHAR,
 	devMod VARCHAR,
 	osv VARCHAR,
@@ -39,6 +41,8 @@ CREATE INDEX phoenix_events_publisher_category_idx ON phoenix_events (pidItem, c
 hbase org.apache.phoenix.mapreduce.index.IndexTool --data-table PHOENIX_EVENTS --index-table PHOENIX_EVENTS_CATEGORY_IDX --output-path PHOENIX_EVENTS_CATEGORY_IDX_HFILES;
 
 
-UPSERT INTO events2 SELECT logTime, appId, icuId, eventNameId,
+UPSERT INTO events2 SELECT logTime, appId, icuId, eventNameId,sesId
  userId, aid, appVer, devModId, osvId, newUsr, authorId, country, cityId,
  idItem, typeItemId, cidItemId, pidItem ,labelItemId, posItem, typeId, locId, posId, eventValue, data, entities, pubItem, imprId FROM phoenix_events where logtime >= TO_DATE('2017-06-08 00:00:00') and logtime < TO_DATE('2017-06-08 12:00:00');
+
+CREATE TABLE profile_test (userId VARCHAR NOT NULL, logTime DATE NOT NULL, appId INTEGER NOT NULL, icu VARCHAR NOT NULL, eventName VARCHAR NOT NULL, sesId VARCHAR, sesBeTm BIGINT, appVer VARCHAR, devMod VARCHAR, osv VARCHAR, newUsr INTEGER, author VARCHAR, country VARCHAR, city VARCHAR, net VARCHAR, idItem BIGINT, typeItem VARCHAR, cateItem VARCHAR, pubItem VARCHAR, labelItem VARCHAR[], posItem VARCHAR, type VARCHAR, loc VARCHAR, posId INTEGER, eventValue DOUBLE, data VARCHAR[], entities VARCHAR[], pubDate DATE, imprId BIGINT CONSTRAINT pk PRIMARY KEY(userId, logTime ROW_TIMESTAMP, appId, icu, eventName) ) UPDATE_CACHE_FREQUENCY = 300000,SALT_BUCKETS=24, IMMUTABLE_ROWS=true, DISABLE_WAL=true;

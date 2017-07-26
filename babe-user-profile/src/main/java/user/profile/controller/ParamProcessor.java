@@ -1,9 +1,6 @@
 package user.profile.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -11,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 import user.profile.model.EventModel;
 import user.profile.processor.PhoenixProcessor;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +26,8 @@ public class ParamProcessor {
     String phoenixTableName ;
 
     @RequestMapping("/profile")
-    public List<EventModel> paramConverter (
+    public Map<String,List<EventModel>> paramConverter (
+            @RequestParam(value="date", required = false) String date,
             @RequestParam(value="dt_start", required = false) String dt_start,
             @RequestParam(value="dt_end", required = false) String dt_end,
             @RequestParam(value="uid", required = false) String uid,
@@ -58,7 +55,11 @@ public class ParamProcessor {
             @RequestParam(value="entity", required = false) List<String> entity,
             @RequestParam(value="published", required = false) String published,
             @RequestParam(value="pub_start", required = false) String pub_start,
-            @RequestParam(value="pub_end", required = false) String pub_end
+            @RequestParam(value="pub_end", required = false) String pub_end,
+            @RequestParam(value="order_by", required = false, defaultValue = "date") String order_by,
+            @RequestParam(value="sort", required = false,defaultValue = "desc") String sort,
+            @RequestParam(value="limit", required = false, defaultValue = "10") Integer limit
+
 
     ) {
 
@@ -69,10 +70,11 @@ public class ParamProcessor {
         System.out.println("Table Name : "+phoenixTableName);
 
         //set each params to Map
+        if (!StringUtils.isEmpty(dt_start)) { params.put("date", date); }
         if (!StringUtils.isEmpty(dt_start)) { params.put("dt_start", dt_start); }
         if (!StringUtils.isEmpty(dt_end)) { params.put("dt_end", dt_end); }
         if (!StringUtils.isEmpty(uid)) { params.put("uid", uid); }
-        if (aid.intValue() != -1) { params.put("aid",aid.intValue()); }
+        if (aid.intValue() != -2) { params.put("aid",aid.intValue()); }
         if (!StringUtils.isEmpty(ver)) { params.put("ver", ver); }
         if (!StringUtils.isEmpty(did)) { params.put("did", did); }
         if (!StringUtils.isEmpty(osv)) { params.put("osv", osv); }
@@ -97,11 +99,13 @@ public class ParamProcessor {
         if (!StringUtils.isEmpty(published)) { params.put("published",published); }
         if (!StringUtils.isEmpty(pub_start)) { params.put("pub_start",pub_start); }
         if (!StringUtils.isEmpty(pub_end)) { params.put("pub_end",pub_end); }
+        if (!StringUtils.isEmpty(order_by)) { params.put("order_by",order_by); }
+        if (!StringUtils.isEmpty(sort)) { params.put("sort",sort); }
+        if (limit.intValue() > 0) { params.put("limit",limit.intValue()); }
 
+        Map<String,List<EventModel>> profileResults = phoenixProcessor.getData(params, phoenixJDBCConfig, phoenixTableName);
 
-        List<EventModel> results = phoenixProcessor.getData(params, phoenixJDBCConfig, phoenixTableName);
-
-        return results;
+        return profileResults;
     }
 
 }

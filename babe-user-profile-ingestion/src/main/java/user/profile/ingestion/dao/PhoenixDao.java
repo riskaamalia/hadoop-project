@@ -30,6 +30,8 @@ public class PhoenixDao {
                 Integer appId = event.getAppId();
                 String icu = event.getIcu();
                 String eventName = event.getEventName();
+                String sesId = event.getSesId();
+                Long sesBeTm = event.getSesBeTm();
                 String userId = event.getUserId();
                 String appVer = event.getAppVer();
                 String devMod = event.getDevMod();
@@ -59,35 +61,37 @@ public class PhoenixDao {
                 Array entities = connection.createArrayOf("VARCHAR", entitiesArray );
 
                 statement = connection.prepareStatement(
-                        "UPSERT INTO "+phoenixTableName+" VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                        "UPSERT INTO "+phoenixTableName+" VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
                 statement.setString(1, userId);
                 statement.setDate(2, logTime);
                 statement.setInt(3, appId);
                 statement.setString(4, icu);
                 statement.setString(5, eventName);
-                statement.setString(6, appVer);
-                statement.setString(7, devMod);
-                statement.setString(8, osv);
-                statement.setInt(9, newUsr);
-                statement.setString(10, author);
-                statement.setString(11, country);
-                statement.setString(12, city);
-                statement.setString(13, net);
-                statement.setLong(14, idItem);
-                statement.setString(15, typeItem);
-                statement.setString(16, cateItem);
-                statement.setString(17, pubItem);
-                statement.setArray(18, labelItem);
-                statement.setString(19, posItem);
-                statement.setString(20, type);
-                statement.setString(21, loc);
-                statement.setInt(22, posId);
-                statement.setDouble(23, eventValue);
-                statement.setArray(24, data);
-                statement.setArray(25, entities);
-                statement.setDate(26, pubDate);
-                statement.setLong(27, imprId);
+                statement.setString(6, sesId);
+                statement.setLong(7, sesBeTm);
+                statement.setString(8, appVer);
+                statement.setString(9, devMod);
+                statement.setString(10, osv);
+                statement.setInt(11, newUsr);
+                statement.setString(12, author);
+                statement.setString(13, country);
+                statement.setString(14, city);
+                statement.setString(15, net);
+                statement.setLong(16, idItem);
+                statement.setString(17, typeItem);
+                statement.setString(18, cateItem);
+                statement.setString(19, pubItem);
+                statement.setArray(20, labelItem);
+                statement.setString(21, posItem);
+                statement.setString(22, type);
+                statement.setString(23, loc);
+                statement.setInt(24, posId);
+                statement.setDouble(25, eventValue);
+                statement.setArray(26, data);
+                statement.setArray(27, entities);
+                statement.setDate(28, pubDate);
+                statement.setLong(29, imprId);
 
                 statement.executeUpdate();
             }

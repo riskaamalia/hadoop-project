@@ -8,23 +8,20 @@ import com.google.gson.annotations.SerializedName;
  */
 public class EventModel {
 
-    @SerializedName("userId")
-    private String userId;
-
     @SerializedName("logTime")
     private String logTime;
 
-    @SerializedName("appId")
-    private int appId;
-
-    @SerializedName("icu")
-    private String icu;
-
-    @SerializedName("eventName")
-    private String eventName;
+    @SerializedName("userId")
+    private String userId;
 
     @SerializedName("sesId")
     private String sesId;
+
+    @SerializedName("sesBeTm")
+    private long sesBeTm;
+
+    @SerializedName("appId")
+    private int appId;
 
     @SerializedName("appVer")
     private String appVer;
@@ -34,6 +31,9 @@ public class EventModel {
 
     @SerializedName("osv")
     private String osv;
+
+    @SerializedName("icu")
+    private String icu;
 
     @SerializedName("newUsr")
     private int newUsr;
@@ -49,6 +49,9 @@ public class EventModel {
 
     @SerializedName("net")
     private String net;
+
+    @SerializedName("eventName")
+    private String eventName;
 
     @SerializedName("idItem")
     private long idItem;
@@ -314,5 +317,13 @@ public class EventModel {
 
     public void setPubDate(String pubDate) {
         this.pubDate = pubDate;
+    }
+
+    public long getSesBeTm() {
+        return sesBeTm;
+    }
+
+    public void setSesBeTm(long sesBeTm) {
+        this.sesBeTm = sesBeTm;
     }
 }
